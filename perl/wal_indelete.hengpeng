@@ -1,0 +1,59 @@
+#!/usr/contrib/bin/perl -w
+
+die "Usage:> wal_indelete resourcefile batchorderfilename\n" if ($#ARGV < 1);
+
+$RESOURCE=$ARGV[0];
+$FILE_TXT="$ARGV[1].txt";
+$FILE_XML="$ARGV[1].xml";
+
+# Opening input file
+open (IN, "$RESOURCE") or die "$!\n";
+
+# Opening output txt file
+open (OUTTXT, ">$FILE_TXT") or die "$!\n";
+
+# Opening output txt file
+open (OUTXML, ">$FILE_XML") or die "$!\n";
+
+print OUTTXT "Op=DeleteCustomerSubscriber|CUSTOMERID\n";
+
+while (<IN>) {
+
+  chomp;
+
+  if (/.*\,([0-9]{8})\,.*/) {
+
+    $MSISDN = $1;
+
+    print OUTTXT "1-1-00213$MSISDN\n";
+
+  }
+}
+
+print OUTXML "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n";
+print OUTXML "<!DOCTYPE batchscript SYSTEM \"batch.dtd\">\n";
+print OUTXML "<batchscript name=\"$ARGV[1]\">\n";
+print OUTXML "<command>\n";
+print OUTXML "<operation name=\"inadvantage/D03Smafbatch.D03\">\n";
+print OUTXML "</operation>\n";
+print OUTXML "<inputdata>\n";
+print OUTXML "<format type=\"bin\"/>\n";
+print OUTXML "<data>\n";
+print OUTXML "<file url=\"$FILE_TXT\"/>\n";
+print OUTXML "</data>\n";
+print OUTXML "</inputdata>\n";
+print OUTXML "<outputdata>\n";
+print OUTXML "<format type=\"bin\"/>\n";
+print OUTXML "<file url=\"$FILE_TXT.log\"/>\n";
+print OUTXML "</outputdata>\n";
+print OUTXML "</command>\n";
+print OUTXML "</batchscript>  ";
+
+close(IN);
+close(OUTTXT);
+close(OUTXML);
+
+print "BATCH CONTROL FILE <$FILE_XML> CREATED SUCCESSFULLY\n";
+print "BATCH INPUT FILE <$FILE_TXT> CREATED SUCCESSFULLY\n";
+
+

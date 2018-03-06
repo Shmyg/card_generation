@@ -1,0 +1,32 @@
+#!/usr/contrib/bin/perl -w
+
+die "Usage:> wal_inloader resourcefile batchorderfilename\n" if ($#ARGV < 1);
+
+$RESOURCE = $ARGV[0];
+$LDAP     = $ARGV[1];
+
+# Opening input file
+open (IN, "$RESOURCE") or die "Resource: $!\n";
+
+# Opening output txt file
+open (OUTLDAP, ">$LDAP") or die "Ldap: $!\n";
+
+while (<IN>) {
+
+  chomp;
+
+  if (/CRE:SUBA.*\,([0-9]{8})\,.*/) {
+
+    $MSISDN = $1;
+
+    print OUTLDAP "$MSISDN\n";
+
+  }
+}
+
+close(IN);
+close(OUTLDAP);
+
+print "LDAP FILE <$LDAP> CREATED SUCCESSFULLY\n";
+
+

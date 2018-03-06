@@ -1,0 +1,63 @@
+#!/usr/contrib/bin/perl -w
+
+die "Usage:> wal_inloader resourcefile batchorderfilename provider\n" if ($#ARGV < 2);
+
+$RESOURCE=$ARGV[0];
+$FILE_TXT="$ARGV[1].txt";
+$FILE_XML="$ARGV[1].xml";
+$PROVIDER=$ARGV[2];
+$AMOUNT=100000;
+
+# Opening input file
+open (IN, "$RESOURCE") or die "$!\n";
+
+# Opening output txt file
+open (OUTTXT, ">$FILE_TXT") or die "$!\n";
+
+# Opening output txt file
+open (OUTXML, ">$FILE_XML") or die "$!\n";
+
+print OUTTXT "Op=CreateCustomerSubscriber|CUSTOMERID|SubscriberData.Cgpa|SubscriberData.CgpaForFax|SubscriberData.CgpaForData|SubscriberData.ProviderID|SubscriberData.OnPeakAccountID.Balance|SubscriberData.OnPeakAccountID.CreditLimit|SubscriberData.OnPeakAccountID.CurrencyCode|SubscriberData.OnPeakAccountID.ExpiryDate|SubscriberData.OffPeakAccountID.Balance|SubscriberData.OffPeakAccountID.CreditLimit|SubscriberData.OffPeakAccountID.CurrencyCode|SubscriberData.OffPeakAccountID.ExpiryDate|SubscriberData.LastTransactionAccountID.Balance|SubscriberData.LastTransactionAccountID.CreditLimit|SubscriberData.LastTransactionAccountID.CurrencyCode|SubscriberData.LastTransactionAccountID.ExpiryDate|SubscriberData.LastTransaction2AccountID.Balance|SubscriberData.LastTransaction2AccountID.CreditLimit|SubscriberData.LastTransaction2AccountID.CurrencyCode|SubscriberData.LastTransaction2AccountID.ExpiryDate|SubscriberData.LastTransaction3AccountID.Balance|SubscriberData.LastTransaction3AccountID.CreditLimit|SubscriberData.LastTransaction3AccountID.CurrencyCode|SubscriberData.LastTransaction3AccountID.ExpiryDate|SubscriberData.IMSI|SubscriberData.IsGPRSUsed|SubscriberData.IsSMSUsed|SubscriberData.IsMTCLockUsed|SubscriberData.IsFnFMenuAllowed\n";
+
+while (<IN>) {
+
+  chomp;
+
+#CRE:SUBA,603032100698246,,,1,,001,55874DDD89EE4E3706D15DDC96654E93,8921303090406982466F,50626269,,,,,,;
+  if (/CRE:SUBA\,([0-9]{15}).*\,([0-9]{8})\,.*/) {
+
+    $IMSI = $1;
+    $MSISDN = $2;
+
+    print OUTTXT "1-1-00213$MSISDN|213$MSISDN|213$MSISDN|213$MSISDN|$PROVIDER|$AMOUNT|0|\"DZD\"|2005-01-01 00:00:00|||\"DZD\"||100||\"DZD\"||100||\"DZD\"||100||\"DZD\"||$IMSI|true|true|true|false\n";
+
+  }
+}
+
+print OUTXML "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n";
+print OUTXML "<!DOCTYPE batchscript SYSTEM \"batch.dtd\">\n";
+print OUTXML "<batchscript name=\"$ARGV[1]\">\n";
+print OUTXML "<command>\n";
+print OUTXML "<operation name=\"inadvantage/D03Smafbatch.D03\">\n";
+print OUTXML "</operation>\n";
+print OUTXML "<inputdata>\n";
+print OUTXML "<format type=\"bin\"/>\n";
+print OUTXML "<data>\n";
+print OUTXML "<file url=\"$FILE_TXT\"/>\n";
+print OUTXML "</data>\n";
+print OUTXML "</inputdata>\n";
+print OUTXML "<outputdata>\n";
+print OUTXML "<format type=\"bin\"/>\n";
+print OUTXML "<file url=\"$FILE_TXT.log\"/>\n";
+print OUTXML "</outputdata>\n";
+print OUTXML "</command>\n";
+print OUTXML "</batchscript>  ";
+
+close(IN);
+close(OUTTXT);
+close(OUTXML);
+
+print "BATCH CONTROL FILE <$FILE_XML> CREATED SUCCESSFULLY\n";
+print "BATCH INPUT FILE <$FILE_TXT> CREATED SUCCESSFULLY\n";
+
+
